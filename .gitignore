@@ -1,0 +1,4 @@
+*.backup
+*.env
+*.bin
+# lets keep them, for now: *.test.v

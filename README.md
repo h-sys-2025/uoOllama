@@ -1,6 +1,9 @@
 # Easy to use (and un-official) lib to use selfhosted ollama models, in v..
 - Very simple lib:
 - This is a MICRO-LIB, onsists of only 4 functions, and can be used in small projects, and nothing more.
+
+> Read ./test.v for an example!
+
 ### imports:
 ```v
 import net.http

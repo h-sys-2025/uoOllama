@@ -1,5 +1,6 @@
-module main
+//module main
 
+/*
 import net.http
 import x.json2 // life savior..
 
@@ -56,3 +57,5 @@ fn main() { // TODO: Convert it into a lib. (soon)
 // status: 200
 // model: huihui_ai/qwen2.5-coder-abliterate:0.5b
 // response: The sky is blue because of.... (LOTS OF TEXT)
+
+*/

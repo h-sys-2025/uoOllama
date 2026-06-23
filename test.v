@@ -1,8 +1,8 @@
-module main
+// module main
 
-import uoollama { OllamaRequest }
+// import uoollama { OllamaRequest }
 
-fn main() {
+/* fn main() {
     // basic req:
     mut req := OllamaRequest{
         model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
@@ -22,4 +22,4 @@ fn main() {
     resp := req.completion()
     resp.print()
     //println(req.model)
-}
+} */

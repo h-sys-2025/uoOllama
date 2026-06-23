@@ -1,12 +1,85 @@
 # Easy to use (and un-official) lib to use selfhosted ollama models, in v..
-> I was a C lover. But now, I love v-lang. **All hail v-lang**.
+- Very simple lib:
+- This is a MICRO-LIB, onsists of only 4 functions, and can be used in small projects, and nothing more.
+### imports:
+```v
+import net.http
+import x.json2
+```
 
-### Whats this about?
-- I want to make a custom IDE, likve [lilly](https://github.com/tauraamui/lilly), and I want a vibe coder in it. (I am generally NOT a vibe coder. I use AI to do things I dont want to do myself.)
+### Structures:
+```v
+// basic request structure.
+struct OllamaRequest {
+    mut: model   string
+    prompt  string
+    stream  bool
+    think   bool // used to enable think/othink mode, true=think, false=nothink
+}
 
-## Contents:
-### Tests:
-- `main.test.v` - Our test file (IT WORKS IN ALL VERSIONS). It provides an easy to learn example of entire lib. (lib is very small in itself, so i fell shame in calling it a lib)
-- `example.test.v` - My goal - To make it simpler.
-### Lib:
-(comming soon)
+// responce structure, contains completion (answers and debug info from the AI.)
+struct OllamaResponse {
+    model     string
+    response  string
+    done      bool
+}
+
+// An ollama model structure
+struct OllamaModel {
+    name       string
+    size       i64
+    digest     string
+    modified_at string
+}
+
+// List of ALL ollama models (currently avalable on your system.) (function list_ollama_models() returns it.)
+struct OllamaModels {
+    models []OllamaModel
+}
+
+```
+
+### Functions:
+```v
+// completion, get answers from AI.
+fn (req OllamaRequest) completion() OllamaResponse
+
+// list all avalable models.
+fn list_ollama_models() (OllamaModels, string)
+
+// use anathor model for same request.
+fn (mut req OllamaRequest) set_model(model_name string) (bool, string)
+
+// print responce.
+fn (resp OllamaResponse) print()
+```
+
+## Example:
+```v
+fn main() {
+    // basic req:
+    mut req := OllamaRequest{
+        model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
+        prompt: "Why is the sky blue? Answer briefly."
+        stream: false
+    }
+
+    // test: ok, errmsg := req.set_model("abcd")
+
+    // test:
+    if !ok {
+        println(errmsg)
+        return
+    }
+
+    // test:
+    resp := req.completion()
+    resp.print()
+    println(req.model)
+}
+
+// YAY IT WORKS..
+// status: 200
+// model: huihui_ai/qwen2.5-coder-abliterate:0.5b
+// response: The sky is blue because of.... (LOTS OF TEXT)
+```

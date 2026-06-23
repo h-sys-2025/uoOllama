@@ -1,6 +1,7 @@
+module main
 
 import net.http
-import x.json2 // lie savior..
+import x.json2 // life savior..
 
 struct OllamaRequest {
 	model   string
@@ -49,6 +50,7 @@ fn main() { // TODO: Convert it into a lib. (soon)
 	println("model: ${result.model}")
 	println("response: ${result.response}")
 }
+
 
 // YAY IT WORKS..
 // status: 200

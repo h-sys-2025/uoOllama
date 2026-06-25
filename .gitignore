@@ -1,4 +1,5 @@
 *.backup
 *.env
 *.bin
+.tests/
 # lets keep them, for now: *.test.v

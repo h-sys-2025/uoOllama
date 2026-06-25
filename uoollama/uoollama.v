@@ -88,6 +88,12 @@ pub fn (mut req OllamaRequest) set_model(model_name string) (bool, string) {
     return true, ""
 }
 
+pub fn (mut req OllamaRequest) prompt_complete(prompt string) OllamaResponse {
+    req.prompt = prompt
+    resp := req.completion()
+    return resp
+}
+
 pub struct OllamaResponse {
     model     string
     response  string

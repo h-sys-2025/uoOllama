@@ -90,6 +90,9 @@ fn list_ollama_models() (OllamaModels, string)
 // use anathor model for same request.
 fn (mut req OllamaRequest) set_model(model_name string) (bool, string)
 
+// prompt the AI with different prompt.
+pub fn (mut req OllamaRequest) prompt_complete(prompt string) OllamaResponse
+
 // print responce.
 fn (resp OllamaResponse) print()
 ```

@@ -1,8 +1,9 @@
 // module main
 
-// import uoollama { OllamaRequest }
+// v install h-sys-2025.uoOllama
+import h_sys_2025.uoollama { OllamaRequest }
 
-/* fn main() {
+fn main() {
     // basic req:
     mut req := OllamaRequest{
         model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
@@ -22,4 +23,4 @@
     resp := req.completion()
     resp.print()
     //println(req.model)
-} */
+}

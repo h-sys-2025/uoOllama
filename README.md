@@ -4,6 +4,20 @@
 
 > Read ./test.v for an example!
 
+![0.1](https://img.shields.io/badge/version-0.2-white?style=flat)
+![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat)
+![vlang](http://img.shields.io/badge/V-0.5+-%236d8fc5?style=flat)
+
+## Installazation:
+```v
+v install h-sys-2025.uoOllama
+```
+
+## Example:
+```v
+
+```
+
 ### imports:
 ```v
 import net.http

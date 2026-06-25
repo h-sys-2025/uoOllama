@@ -2,7 +2,7 @@
 - Very simple lib:
 - This is a MICRO-LIB, onsists of only 4 functions, and can be used in small projects, and nothing more.
 
-![0.1](https://img.shields.io/badge/version-0.2-white?style=flat)
+![0.2](https://img.shields.io/badge/version-0.2-white?style=flat)
 ![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat)
 ![vlang](http://img.shields.io/badge/V-0.5+-%236d8fc5?style=flat)
 

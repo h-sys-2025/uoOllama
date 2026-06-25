@@ -2,8 +2,6 @@
 - Very simple lib:
 - This is a MICRO-LIB, onsists of only 4 functions, and can be used in small projects, and nothing more.
 
-> Read ./test.v for an example!
-
 ![0.1](https://img.shields.io/badge/version-0.2-white?style=flat)
 ![GitHub](https://img.shields.io/badge/license-MIT-blue?style=flat)
 ![vlang](http://img.shields.io/badge/V-0.5+-%236d8fc5?style=flat)
@@ -15,7 +13,32 @@ v install h-sys-2025.uoOllama
 
 ## Example:
 ```v
+module main
 
+// v install h-sys-2025.uoOllama
+import h_sys_2025.uoollama.uoollama { OllamaRequest }
+
+fn main() {
+    // basic req:
+    mut req := OllamaRequest{
+        model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
+        prompt: "Why is the sky blue? Answer briefly."
+        stream: false
+    }
+
+    // test: ok, errmsg := req.set_model("abcd")
+
+    // test:
+    // if !ok {
+    //     println(errmsg)
+    //     return
+    // }
+
+    // test:
+    resp := req.completion()
+    resp.print()
+    //println(req.model)
+}
 ```
 
 ### imports:

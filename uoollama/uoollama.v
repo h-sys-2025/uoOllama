@@ -2,6 +2,7 @@ module uoollama
 
 import net.http
 import x.json2
+import time
 
 pub struct OllamaRequest {
     pub mut:
@@ -12,7 +13,7 @@ pub struct OllamaRequest {
 }
 
 pub fn (req OllamaRequest) completion() OllamaResponse {
-    // test: start_time := time.now().unix_time()
+    start_time := time.now().unix()
 
    	json_data := json2.encode(req)
 
@@ -32,13 +33,14 @@ pub fn (req OllamaRequest) completion() OllamaResponse {
       		return OllamaResponse{}
    	}
 
-   	result := json2.decode[OllamaResponse](resp.body) or {
+   	mut result := json2.decode[OllamaResponse](resp.body) or {
   		    println("json decode operation failed: ${err}")
       		return OllamaResponse{}
    	}
 
-    // test: end_time := time.now().unix_time()
-    // test: duration := end_time - start_time
+    end_time := time.now().unix()
+    duration := (end_time - start_time)
+   	result.time_taken = duration
     return result
 }
 
@@ -90,18 +92,19 @@ pub fn (mut req OllamaRequest) set_model(model_name string) (bool, string) {
 
 pub fn (mut req OllamaRequest) prompt_complete(prompt string) OllamaResponse {
     req.prompt = prompt
-    resp := req.completion()
+    resp:= req.completion()
     return resp
 }
 
 pub struct OllamaResponse {
     model     string
     response  string
-    done      bool
+    pub mut: time_taken i64
 }
 
 pub fn (resp OllamaResponse) print() {
    	println("model: ${resp.model}")
+   	println("time-taken: ${resp.time_taken} second(s)")
    	println("response: ${resp.response}")
     return
 }

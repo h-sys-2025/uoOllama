@@ -81,6 +81,15 @@ fn format_rules(opti string) string {
     rule = "${rule} \n- If a tool fails, try an alternative approach."
     rule = "${rule} \n- When you have enough information, give a clear, direct final answer."
     return rule
+  } else if opt == "output_fmt" {
+    mut rule := ""
+    rule = "${rule} \n## Output"
+    rule = "${rule} \n- Be concise. Don't repeat tool outputs verbatim — summarize meaningfully."
+    rule = "${rule} \n- Use markdown when it improves readability."
+    rule = "${rule} \n- Never fabricate tool results."
+    rule = "${rule} \n- When answering a user's question, use the markdown_print tool to render your response as pretty HTML. This makes messages more readable for the user."
+    rule = "${rule} \n- For **long or complex tasks**, use manage_todos to create a small task list at the start. On each subsequent iteration, call manage_todos with action \"list\" to remind yourself where you are. Mark items done as you complete them. Keep the todo list small (3-6 items) and focused on remaining work."
+
   }
 
   return ""
@@ -137,6 +146,7 @@ fn (skills Skills) fmt_skills() string {
       skills_help = "${skills_help} \n${skilli.help()}"
   }
   skills_help = "${skills_help}} \n${format_rules("tool_usage")}"
+  skills_help = "${skills_help}} \n${format_rules("output_fmt")}"
 
   return skills_help
 }

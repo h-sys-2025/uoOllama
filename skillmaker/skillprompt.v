@@ -1,24 +1,46 @@
 module main
 
-fn help_build(name string, args []string) string {
+fn help_build(name string, args []Arg) string {
   mut help := "<tool_call> {\"name\":\"${name}\",\"args\":{"
   for x in args {
-    help = "${help} \"${x}\":\"VALUE_HERE\""
+    mut arg_name := x.name
+    mut arg_dtype := x.dtype
+    help = "${help} \"${arg_name}\":\"VALUE_OF_TYPE(${arg_dtype})_HERE\""
   }
   help = "${help}}} </tool_call>"
   return help
 }
 
+struct Arg {
+  pub mut:
+    name string
+    dtype string
+}
+
 fn usage_build(name string, args []string) Usage {
+  mut arguments := []Arg{}
+  for x in args {
+    mut my_arg := Arg{}
+    ps := x.split(":")
+    if ps.len > 1 && ps.len < 3 {
+      my_arg.name = x.split(":")[0]
+      my_arg.dtype = x.split(":")[1]
+    } else {
+      my_arg.name = x.split(":")[0]
+      my_arg.dtype = "any"
+    }
+    arguments << my_arg
+  }
+
   return Usage{
-    args: args,
-    args_count: args.len
-    help: help_build(name, args)
+    args: arguments,
+    args_count: arguments.len
+    help: help_build(name, arguments)
   }
 }
 
 struct Usage {
-  args []string
+  args []Arg
   args_count int
   help string
 }
@@ -28,9 +50,11 @@ fn format_rules(opti string) string {
   mut opt := opti.to_lower()
   if opt == "tool_usage" {
     mut rule := ""
-    rule = "${rule} \n## Help for skill/tool usage:"
+    rule = "${rule} \n## Help for skill/tool usage: Tool Use -- STRICT RULES"
+    rule = "${rule} \nYou MUST use the DSML (Domain Specific Markup Language) format to call tools. This is the ONLY way to invoke tools. Never describe a tool call in prose -- emit it directly."
     rule = "${rule} \n- every arg must be covered with perfect/valid (\")-these things."
-    rule = "${rule} \n  example: <tool_call> {\"name\": \"$TOOL_NAME\", \"args\": {\"$ARG_NAME\": \"$ARG_VALUE\"}} </tool_call> "
+    rule = "${rule} \n  example: short format: short format (preferred): <tool_call name=\"web_search\" query=\"vulnerabilities 2026\" /> "
+    rule = "${rule} \n  big example: JSON format (if you need complex nested args): <tool_call> {\"name\": \"$TOOL_NAME\", \"args\": {\"$ARG_NAME\": \"$ARG_VALUE\"}} </tool_call> "
     rule = "${rule} \n  the middle-man parser will look for: example: `$SKILL_HELP$` "
     rule = "${rule} \n- if your format is wrong, then you will recieve a syntax error."
     rule = "${rule} \n${format_rules("many_tools_per_message")}"
@@ -85,7 +109,7 @@ fn (mut skills Skills) new_skill(name string, args []string) (bool, string) {
 
 fn main() {
   mut skill_list := Skills{}
-  skill_list.new_skill("bash","command timeout".split(" "))
+  skill_list.new_skill("bash","command:string timeout:milliseconds".split(" "))
 
   // test: (should fail) duplicate name.
   // ok, err := skill_list.new_skill("bash","command timeout".split(" "))

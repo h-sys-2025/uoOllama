@@ -1,4 +1,4 @@
-module main
+module skillmaker
 
 import strings
 
@@ -208,57 +208,3 @@ fn (skills Skills) execute_tool(call ToolCall) string {
   return "Error: Skill '${call.name}' not found."
 }
 
-fn main() {
-  mut skill_list := Skills{}
-
-  skill_list.new_skill("bash", "Used to run bash commands.", ["command:string", "timeout:milliseconds"],
-    fn (args map[string]string) string {
-      cmd := args["command"] or { "echo no command" }
-      timeout := args["timeout"] or { "30000" }
-      return "Bash executed: ${cmd} (timeout=${timeout}ms)"
-    })
-
-  skill_list.new_skill("weather", "Gets weather for a city.", ["city:string", "units:string"],
-    fn (args map[string]string) string {
-      city := args["city"] or { "Unknown" }
-      units := args["units"] or { "metric" }
-      return "Weather for ${city}: 24°C, ${units}"
-    })
-
-  //println("=== Skills & Guidelines ===")
-  //println(skill_list.fmt_skills_and_guidelines())
-
-  test_input := "
-Some normal text before tools.
-
-<tool_call name=\"bash\">
-command = ls -la
-timeout = 5000
-</tool_call>
-
-<tool_call name=\"weather\">
-city = Tokyo
-units = metric
-</tool_call>
-
-More text after.
-"
-
-  println(test_input)
-  parsed := skill_list.parse(test_input)
-
-  println("\n=== Parsed ===")
-  for tc in parsed.tool_calls {
-    println("Tool: ${tc.name}")
-    for k, v in tc.args {
-      println("  ${k} = ${v}")
-    }
-  }
-
-  println("\n=== Execution Results ===")
-  for tc in parsed.tool_calls {
-    result := skill_list.execute_tool(tc)
-    println("→ ${tc.name}: ${result}")
-  }
-
-}

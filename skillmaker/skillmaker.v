@@ -53,7 +53,7 @@ struct Skill {
   executor fn (args map[string]string) string @[required]
 }
 
-pub fn (skill Skill) help() string {
+pub pub fn (skill Skill) help() string {
   mut sb := strings.new_builder(512)
   sb.write_string(skill.usage.help)
   sb.write_string("\n### Desc:\n - ${skill.desc}")
@@ -66,7 +66,7 @@ pub struct Skills {
   count  int
 }
 
-fn (mut skills Skills) new_skill(name string, desc string, args []string, executor fn (args map[string]string) string) (bool, string) {
+pub fn (mut skills Skills) new_skill(name string, desc string, args []string, executor fn (args map[string]string) string) (bool, string) {
   for x in skills.skills {
     if x.name == name {
       return false, "A skill with same name: '${name}', already exists."
@@ -119,7 +119,7 @@ fn format_rules(opti string) string {
   }
 }
 
-fn (skills Skills) fmt_skills_and_guidelines() string {
+pub fn (skills Skills) fmt_skills_and_guidelines() string {
   mut sb := strings.new_builder(2048)
   sb.write_string(format_rules("tool_call_guidelines"))
   sb.write_string("\n\n# All Skills:")
@@ -150,7 +150,7 @@ struct Parser {
   text       []string
 }
 
-fn (skills Skills) parse(message string) Parser {
+pub fn (skills Skills) parse(message string) Parser {
   mut parser := Parser{}
   lines := message.split("\n")
   mut i := 0
@@ -199,7 +199,7 @@ fn (skills Skills) parse(message string) Parser {
   return parser
 }
 
-fn (skills Skills) execute_tool(call ToolCall) string {
+pub fn (skills Skills) execute_tool(call ToolCall) string {
   for skill in skills.skills {
     if skill.name == call.name {
       return skill.executor(call.args)

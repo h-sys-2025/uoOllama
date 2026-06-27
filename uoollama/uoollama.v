@@ -4,6 +4,14 @@ import net.http
 import x.json2
 import time
 
+import h_sys_2025.uoollama.skillmaker { Skills }
+
+pub fn gen_sys_prompt(skills Skills, bio string) string {
+  mut sys_prompt := bio
+  sys_prompt = "${sys_prompt} \n${skills.fmt_skills_and_guidelines()}"
+  return sys_prompt
+}
+
 pub struct OllamaRequest {
     pub mut:
         model   string

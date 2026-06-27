@@ -203,11 +203,11 @@ pub fn (skills Skills) parse(message string) Parser {
 
 pub fn (parser Parser) fmt_parsed() string {
   mut result := ""
-  result = "${result} \n=== Parsed ===")
+  result = "${result} \n=== Parsed ==="
   for tc in parsed.tool_calls {
-    result = "${result} \nTool: ${tc.name}")
+    result = "${result} \nTool: ${tc.name}"
     for k, v in tc.args {
-      result = "${result} \n  ${k} = ${v}")
+      result = "${result} \n  ${k} = ${v}"
     }
   }
   return result

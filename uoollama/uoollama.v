@@ -29,7 +29,8 @@ pub struct OllamaRequest {
 
 pub struct OllamaResponse {
   model    string
-  response string
+  pub:
+    response string
   pub mut:
     time_taken i64
     done       bool

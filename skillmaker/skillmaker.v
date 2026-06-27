@@ -210,6 +210,7 @@ pub fn (parser Parser) fmt_parsed() string {
       result = "${result} \n  ${k} = ${v}")
     }
   }
+  return result
 }
 
 pub fn (skills Skills) execute_tool(call ToolCall) string {

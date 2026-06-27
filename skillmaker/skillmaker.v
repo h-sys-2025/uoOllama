@@ -140,8 +140,8 @@ pub fn (skills Skills) fmt_skills_and_guidelines() string {
 
 struct ToolCall {
   pub mut:
-  name string
-  args map[string]string
+    name string
+    args map[string]string
 }
 
 struct Parser {
@@ -204,7 +204,7 @@ pub fn (skills Skills) parse(message string) Parser {
 pub fn (parser Parser) fmt_parsed() string {
   mut result := ""
   result = "${result} \n=== Parsed ==="
-  for tc in parsed.tool_calls {
+  for tc in parser.tool_calls {
     result = "${result} \nTool: ${tc.name}"
     for k, v in tc.args {
       result = "${result} \n  ${k} = ${v}"

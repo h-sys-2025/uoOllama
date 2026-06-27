@@ -8,7 +8,7 @@ import h_sys_2025.uoollama.skillmaker { Skills }
 // Generate full system prompt (bio + skills)
 pub fn gen_sys_prompt(skills Skills, bio string) string {
   mut sys_prompt := bio
-  sys_prompt += '\n${skills.fmt_skills_and_guidelines()}'
+  sys_prompt += "\n${skills.fmt_skills_and_guidelines()}"
   return sys_prompt
 }
 
@@ -41,23 +41,23 @@ pub fn (req OllamaRequest) completion() OllamaResponse {
   json_data := json2.encode(req)
 
   headers := http.new_header_from_map({
-    http.CommonHeader.content_type: 'application/json'
+    http.CommonHeader.content_type: "application/json"
   })
 
   conf := http.FetchConfig{
     method: .post
-    url:    'http://localhost:11434/api/generate'
+    url:    "http://localhost:11434/api/generate"
     header: headers
     data:   json_data
   }
 
   resp := http.fetch(conf) or {
-    println('Request failed: ${err}')
+    println("Request failed: ${err}")
     return OllamaResponse{}
   }
 
   mut result := json2.decode[OllamaResponse](resp.body) or {
-    println('JSON decode failed: ${err}')
+    println("JSON decode failed: ${err}")
     return OllamaResponse{response: resp.body}
   }
 
@@ -72,46 +72,46 @@ pub fn (req OllamaRequest) chat_completion() OllamaResponse {
   mut msgs := req.messages.clone()
 
   // Prepend system prompt if set
-  if req.sys_prompt != '' {
+  if req.sys_prompt != "" {
     msgs.prepend(Message{
-      role:    'system'
+      role:    "system"
       content: req.sys_prompt
     })
   }
 
   // Add current user prompt
-  if req.prompt != '' {
+  if req.prompt != "" {
     msgs << Message{
-      role:    'user'
+      role:    "user"
       content: req.prompt
     }
   }
 
   chat_payload := {
-    'model':    req.model
-    'messages': msgs
-    'stream':   req.stream
+    "model":    req.model
+    "messages": msgs
+    "stream":   req.stream
   }
 
   json_data := json2.encode(chat_payload)
   headers := http.new_header_from_map({
-    http.CommonHeader.content_type: 'application/json'
+    http.CommonHeader.content_type: "application/json"
   })
 
   conf := http.FetchConfig{
     method: .post
-    url:    'http://localhost:11434/api/chat'
+    url:    "http://localhost:11434/api/chat"
     header: headers
     data:   json_data
   }
 
   resp := http.fetch(conf) or {
-    println('Chat request failed: ${err}')
+    println("Chat request failed: ${err}")
     return OllamaResponse{}
   }
 
   mut result := json2.decode[OllamaResponse](resp.body) or {
-    println('JSON decode failed for chat: ${err}')
+    println("JSON decode failed for chat: ${err}")
     return OllamaResponse{response: resp.body}
   }
 
@@ -132,31 +132,31 @@ pub struct OllamaModels {
 }
 
 pub fn list_ollama_models() (OllamaModels, string) {
-  resp := http.get('http://localhost:11434/api/tags') or {
-    return OllamaModels{}, 'Request error'
+  resp := http.get("http://localhost:11434/api/tags") or {
+    return OllamaModels{}, "Request error"
   }
   if resp.status_code != 200 {
-    return OllamaModels{}, 'Error: status code ${resp.status_code}'
+    return OllamaModels{}, "Error: status code ${resp.status_code}"
   }
   data := json2.decode[OllamaModels](resp.body) or {
-    return OllamaModels{}, 'Error parsing JSON'
+    return OllamaModels{}, "Error parsing JSON"
   }
-  return data, ''
+  return data, ""
 }
 
 // Set model with validation
 pub fn (mut req OllamaRequest) set_model(model_name string) (bool, string) {
   models_, err := list_ollama_models()
-  if err != '' {
+  if err != "" {
     return false, err
   }
   for m in models_.models {
     if m.name == model_name {
       req.model = model_name
-      return true, ''
+      return true, ""
     }
   }
-  return false, 'Model "${model_name}" does not exist. Use list_ollama_models() to see available ones.'
+  return false, "Model '${model_name}' does not exist. Use list_ollama_models() to see available ones."
 }
 
 // Convenience methods
@@ -171,20 +171,20 @@ pub fn (mut req OllamaRequest) chat(prompt string) OllamaResponse {
 }
 
 pub fn (resp OllamaResponse) print() {
-  println('Model     : ${resp.model}')
-  println('Time      : ${resp.time_taken} second(s)')
-  println('Done      : ${resp.done}')
-  println('Response  :\n${resp.response}')
+  println("Model     : ${resp.model}")
+  println("Time      : ${resp.time_taken} second(s)")
+  println("Done      : ${resp.done}")
+  println("Response  :\n${resp.response}")
 }
 
 // Example usage
 // fn main() {
 //   mut req := OllamaRequest{
-//     model:      'llama3.2'
+//     model:      "llama3.2"
 //     stream:     false
-//     sys_prompt: 'You are a helpful assistant that follows tool usage rules strictly.'
+//     sys_prompt: "You are a helpful assistant that follows tool usage rules strictly."
 //   }
 
-//   resp := req.chat('Why is the sky blue? Answer briefly.')
+//   resp := req.chat("Why is the sky blue? Answer briefly.")
 //   resp.print()
 // }

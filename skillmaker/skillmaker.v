@@ -202,7 +202,7 @@ pub fn (skills Skills) parse(message string) Parser {
 }
 
 pub fn (parser Parser) fmt_parsed() string {
-  mut resukt := ""
+  mut result := ""
   result = "${result} \n=== Parsed ===")
   for tc in parsed.tool_calls {
     result = "${result} \nTool: ${tc.name}")

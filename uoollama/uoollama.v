@@ -312,7 +312,7 @@ pub fn (mut req OllamaRequest) run_agent(prompt string, skills Skills, max_round
     mut tool_results := ""
     for tc in parsed.tool_calls {
       result := skills.execute_tool(tc)
-      tool_results += "<tool_result name="${tc.name}">\n${result}\n</tool_result>\n"
+      tool_results += "<tool_result name=\"${tc.name}\">\n${result}\n</tool_result>\n"
     }
 
     // Feed results back as the next user turn

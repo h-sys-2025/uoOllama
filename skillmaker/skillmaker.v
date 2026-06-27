@@ -53,7 +53,7 @@ struct Skill {
   executor fn (args map[string]string) string @[required]
 }
 
-pub pub fn (skill Skill) help() string {
+pub fn (skill Skill) help() string {
   mut sb := strings.new_builder(512)
   sb.write_string(skill.usage.help)
   sb.write_string("\n### Desc:\n - ${skill.desc}")

@@ -19,20 +19,27 @@ pub struct Message {
 
 pub struct OllamaRequest {
   pub mut:
-  model      string
-  prompt     string
-  stream     bool
-  think      bool
-  sys_prompt string
-  messages   []Message // for chat history
+    model      string
+    prompt     string
+    stream     bool
+    think      bool
+    sys_prompt string
+    messages   []Message // for chat history
 }
 
 pub struct OllamaResponse {
   model    string
   response string
   pub mut:
-  time_taken i64
-  done       bool
+    time_taken i64
+    done       bool
+}
+
+pub struct ChatPayload {
+  pub mut:
+    model string
+    messages []Message
+    stream bool
 }
 
 // Legacy single-prompt completion
@@ -87,16 +94,16 @@ pub fn (req OllamaRequest) chat_completion() OllamaResponse {
     }
   }
 
-  chat_payload := {
-    "model":    req.model
-    "messages": msgs
-    "stream":   req.stream
+  chat_payload := ChatPayload{
+    model:    req.model
+    messages: msgs
+    stream:   req.stream
   }
 
   json_data := json2.encode(chat_payload)
-  headers := http.new_header_from_map({
-    http.CommonHeader.content_type: "application/json"
-  })
+    headers := http.new_header_from_map({
+      http.CommonHeader.content_type: "application/json"
+    })
 
   conf := http.FetchConfig{
     method: .post

@@ -11,7 +11,7 @@ import h_sys_2025.uoollama.skillmaker { Skills, ToolCall }
 
 // Build a full system prompt from bio + skills block.
 pub fn gen_sys_prompt(skills Skills, bio string) string {
-  return bio + '\n' + skills.fmt_skills_and_guidelines()
+  return bio + "\n" + skills.fmt_skills_and_guidelines()
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ pub mut:
 
 fn post_json(url string, payload string) !string {
   headers := http.new_header_from_map({
-    http.CommonHeader.content_type: 'application/json'
+    http.CommonHeader.content_type: "application/json"
   })
   conf := http.FetchConfig{
     method: .post
@@ -106,9 +106,9 @@ pub fn (req OllamaRequest) chat_completion() OllamaResponse {
   mut msgs := []Message{}
 
   // 1. System prompt → first message (role = "system")
-  if req.sys_prompt != '' {
+  if req.sys_prompt != "" {
     msgs << Message{
-      role:    'system'
+      role:    "system"
       content: req.sys_prompt
     }
   }
@@ -117,31 +117,31 @@ pub fn (req OllamaRequest) chat_completion() OllamaResponse {
   msgs << req.messages
 
   // 3. Current user turn
-  if req.prompt != '' {
+  if req.prompt != "" {
     msgs << Message{
-      role:    'user'
+      role:    "user"
       content: req.prompt
     }
   }
 
   payload := json2.encode({
-    'model':    json2.Any(req.model)
-    'stream':   json2.Any(false)
-    'messages': json2.Any(msgs.map(fn (m Message) json2.Any {
+    "model":    json2.Any(req.model)
+    "stream":   json2.Any(false)
+    "messages": json2.Any(msgs.map(fn (m Message) json2.Any {
       return json2.Any({
-        'role':    json2.Any(m.role)
-        'content': json2.Any(m.content)
+        "role":    json2.Any(m.role)
+        "content": json2.Any(m.content)
       })
     }))
   })
 
-  body := post_json('http://localhost:11434/api/chat', payload) or {
-    eprintln('[uoollama] chat request failed: ${err}')
+  body := post_json("http://localhost:11434/api/chat", payload) or {
+    eprintln("[uoollama] chat request failed: ${err}")
     return OllamaResponse{}
   }
 
   raw := json2.decode[ChatResponse](body) or {
-    eprintln('[uoollama] JSON decode failed: ${err}\nraw: ${body}')
+    eprintln("[uoollama] JSON decode failed: ${err}\nraw: ${body}")
     return OllamaResponse{
       response: body
     }
@@ -163,19 +163,19 @@ pub fn (req OllamaRequest) completion() OllamaResponse {
   start := time.now().unix()
 
   payload := json2.encode({
-    'model':      json2.Any(req.model)
-    'prompt':     json2.Any(req.prompt)
-    'system':     json2.Any(req.sys_prompt)
-    'stream':     json2.Any(false)
+    "model":      json2.Any(req.model)
+    "prompt":     json2.Any(req.prompt)
+    "system":     json2.Any(req.sys_prompt)
+    "stream":     json2.Any(false)
   })
 
-  body := post_json('http://localhost:11434/api/generate', payload) or {
-    eprintln('[uoollama] generate request failed: ${err}')
+  body := post_json("http://localhost:11434/api/generate", payload) or {
+    eprintln("[uoollama] generate request failed: ${err}")
     return OllamaResponse{}
   }
 
   raw := json2.decode[GenerateResponse](body) or {
-    eprintln('[uoollama] JSON decode failed: ${err}')
+    eprintln("[uoollama] JSON decode failed: ${err}")
     return OllamaResponse{response: body}
   }
 
@@ -205,30 +205,30 @@ pub:
 }
 
 pub fn list_ollama_models() (OllamaModels, string) {
-  resp := http.get('http://localhost:11434/api/tags') or {
-    return OllamaModels{}, 'Request error: ${err}'
+  resp := http.get("http://localhost:11434/api/tags") or {
+    return OllamaModels{}, "Request error: ${err}"
   }
   if resp.status_code != 200 {
-    return OllamaModels{}, 'Error: HTTP ${resp.status_code}'
+    return OllamaModels{}, "Error: HTTP ${resp.status_code}"
   }
   data := json2.decode[OllamaModels](resp.body) or {
-    return OllamaModels{}, 'JSON parse error: ${err}'
+    return OllamaModels{}, "JSON parse error: ${err}"
   }
-  return data, ''
+  return data, ""
 }
 
 pub fn (mut req OllamaRequest) set_model(model_name string) (bool, string) {
   models_, err := list_ollama_models()
-  if err != '' {
+  if err != "" {
     return false, err
   }
   for m in models_.models {
     if m.name == model_name {
       req.model = model_name
-      return true, ''
+      return true, ""
     }
   }
-  return false, "Model '${model_name}' not found. Available: ${models_.models.map(it.name).join(', ')}"
+  return false, "Model '${model_name}' not found. Available: ${models_.models.map(it.name).join(", ")}"
 }
 
 // ---------------------------------------------------------------------------
@@ -246,10 +246,10 @@ pub fn (mut req OllamaRequest) chat(prompt string) OllamaResponse {
 }
 
 pub fn (resp OllamaResponse) print() {
-  println('Model      : ${resp.model}')
-  println('Time       : ${resp.time_taken}s')
-  println('Done       : ${resp.done}')
-  println('Response   :\n${resp.response}')
+  println("Model      : ${resp.model}")
+  println("Time       : ${resp.time_taken}s")
+  println("Done       : ${resp.done}")
+  println("Response   :\n${resp.response}")
 }
 
 // ---------------------------------------------------------------------------
@@ -288,18 +288,18 @@ pub fn (mut req OllamaRequest) run_agent(prompt string, skills Skills, max_round
     }
 
     resp := turn.chat_completion()
-    if resp.response == '' {
+    if resp.response == "" {
       break
     }
 
     // Record the assistant turn in history
-    history << Message{role: 'user', content: current_prompt}
-    history << Message{role: 'assistant', content: resp.response}
+    history << Message{role: "user", content: current_prompt}
+    history << Message{role: "assistant", content: resp.response}
 
     // Parse tool calls
     parsed := skills.parse(resp.response)
     if parsed.tool_calls.len == 0 {
-      // No tools needed — we're done
+      // No tools needed — we"re done
       req.messages = history
       return AgentResult{
         final_response: resp.response
@@ -309,10 +309,10 @@ pub fn (mut req OllamaRequest) run_agent(prompt string, skills Skills, max_round
     }
 
     // Execute every tool call and collect results
-    mut tool_results := ''
+    mut tool_results := ""
     for tc in parsed.tool_calls {
       result := skills.execute_tool(tc)
-      tool_results += '<tool_result name="${tc.name}">\n${result}\n</tool_result>\n'
+      tool_results += "<tool_result name="${tc.name}">\n${result}\n</tool_result>\n"
     }
 
     // Feed results back as the next user turn
@@ -322,7 +322,7 @@ pub fn (mut req OllamaRequest) run_agent(prompt string, skills Skills, max_round
 
   // Reached max_rounds — return whatever history we have
   req.messages = history
-  last_assistant := history.filter(it.role == 'assistant').last()
+  last_assistant := history.filter(it.role == "assistant").last()
   return AgentResult{
     final_response: last_assistant.content
     history:        history

@@ -60,7 +60,7 @@ pub fn (skill Skill) help() string {
   return sb.str()
 }
 
-struct Skills {
+pub struct Skills {
   pub mut:
   skills []Skill
   count  int
@@ -207,4 +207,3 @@ fn (skills Skills) execute_tool(call ToolCall) string {
   }
   return "Error: Skill '${call.name}' not found."
 }
-

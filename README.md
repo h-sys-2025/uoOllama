@@ -21,114 +21,123 @@ import h_sys_2025.uoollama.skillmaker { Skills }      // skillssssss.
 ```v
 module main
 
-// v install h-sys-2025.uoOllama
-import h_sys_2025.uoollama.uoollama { OllamaRequest }
+import h_sys_2025.uoollama.uoollama { OllamaRequest, gen_sys_prompt }
+import h_sys_2025.uoollama.skillmaker { Skills }
+import os
+
+// ---------------------------------------------------------------------------
+// Real executors (swap stubs for actual logic here)
+// ---------------------------------------------------------------------------
+
+fn exec_bash(args map[string]string) string {
+  cmd     := args["command"] or { return "Error: missing command" }
+  timeout := args["timeout"] or { "30000" }
+  // Uncomment to actually run:
+  // result := os.execute(cmd)
+  // return result.output
+  return "[bash] ran: `${cmd}` (timeout=${timeout}ms) → exit 0"
+}
+
+fn exec_weather(args map[string]string) string {
+  city  := args["city"]  or { return "Error: missing city" }
+  units := args["units"] or { "metric" }
+  // Swap with a real HTTP call to a weather API here.
+  return "[weather] ${city}: 24°C, humidity 60%, ${units} units"
+}
+
+fn exec_read_file(args map[string]string) string {
+  path := args["path"] or { return "Error: missing path" }
+  return os.read_file(path) or { "Error reading file: ${err}" }
+}
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
 
 fn main() {
-    // basic req:
-    mut req := OllamaRequest{
-        model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
-        prompt: "Why is the sky blue? Answer briefly."
-        stream: false
-    }
+  mut skills := Skills{}
 
-    // test: ok, errmsg := req.set_model("abcd")
+  skills.new_skill(
+    "bash",
+    "Run a shell command and return stdout.",
+    ["command:string", "timeout:milliseconds"],
+    exec_bash,
+  )
 
-    // test:
-    // if !ok {
-    //     println(errmsg)
-    //     return
-    // }
+  skills.new_skill(
+    "weather",
+    "Get current weather for a city.",
+    ["city:string", "units:string"],
+    exec_weather,
+  )
 
-    // test:
-    resp := req.completion()
-    resp.print()
-    //println(req.model)
+  skills.new_skill(
+    "read_file",
+    "Read a file from disk and return its contents.",
+    ["path:string"],
+    exec_read_file,
+  )
+
+  bio := "You are a concise, tool-driven assistant.\n" +
+         "Always use a tool when one is available rather than guessing."
+
+  sys_prompt := gen_sys_prompt(skills, bio)
+
+  mut req := OllamaRequest{
+    model:      "huihui_ai/qwen2.5-coder-abliterate:3b-instruct-q4_K_M-strict"
+    sys_prompt: sys_prompt
+    stream:     false
+  }
+
+  // Optional — validate the model exists before sending:
+  // ok, errmsg := req.set_model(req.model)
+  // if !ok { eprintln("Model error: ${errmsg}") return }
+
+  println(" Demo A — single chat turn + manual parse")
+
+  resp_a := req.chat("What''s the weather in Tokyo?")
+  println("\n[raw response]\n${resp_a.response}")
+
+  parsed_a := skills.parse(resp_a.response)
+
+  if parsed_a.plain_text() != "" {
+    println("\n[assistant text]\n${parsed_a.plain_text()}")
+  }
+
+  if parsed_a.tool_calls.len > 0 {
+    println("\n[tool calls detected]\n${parsed_a.fmt_parsed()}")
+    println("\n[tool results]\n${skills.execute_all(parsed_a)}")
+  } else {
+    println("\n(no tool calls detected)")
+  }
+
+  // run_agent handles parse → execute → feed-back automatically,
+  // looping until the model stops emitting tool calls.
+  println(" Demo B — agentic loop (auto tool use)")
+
+  result := req.run_agent(
+    "Check the weather in London and also list the files in /tmp with bash.",
+    skills,
+    5, // max rounds before giving up
+  )
+
+  println("\n[final response after ${result.rounds} round(s)]\n${result.final_response}")
+  println("\n[conversation history — ${result.history.len} messages]")
+  for i, m in result.history {
+    preview := if m.content.len > 80 { m.content[..80] + "…" } else { m.content }
+    println("  ${i + 1}. [${m.role}] ${preview}")
+  }
+
+  println(" Demo C — follow-up turn with history")
+
+  // Reuse history from the agent run so context is preserved.
+  req.messages = result.history
+  follow_up := req.chat("Now check the weather in Paris too.")
+  println("\n[follow-up response]\n${follow_up.response}")
+
+  parsed_c := skills.parse(follow_up.response)
+  if parsed_c.tool_calls.len > 0 {
+    println("\n[tool results]\n${skills.execute_all(parsed_c)}")
+  }
 }
-```
-
-### imports:
-```v
-import net.http
-import x.json2
-```
-
-### Structures:
-```v
-// basic request structure.
-struct OllamaRequest {
-    mut: model   string
-    prompt  string
-    stream  bool
-    think   bool // used to enable think/othink mode, true=think, false=nothink
-}
-
-// responce structure, contains completion (answers and debug info from the AI.)
-struct OllamaResponse {
-    model     string
-    response  string
-    done      bool
-}
-
-// An ollama model structure
-struct OllamaModel {
-    name       string
-    size       i64
-    digest     string
-    modified_at string
-}
-
-// List of ALL ollama models (currently avalable on your system.) (function list_ollama_models() returns it.)
-struct OllamaModels {
-    models []OllamaModel
-}
-
-```
-
-### Functions:
-```v
-// completion, get answers from AI.
-fn (req OllamaRequest) completion() OllamaResponse
-
-// list all avalable models.
-fn list_ollama_models() (OllamaModels, string)
-
-// use anathor model for same request.
-fn (mut req OllamaRequest) set_model(model_name string) (bool, string)
-
-// prompt the AI with different prompt.
-pub fn (mut req OllamaRequest) prompt_complete(prompt string) OllamaResponse
-
-// print responce.
-fn (resp OllamaResponse) print()
-```
-
-## Example:
-```v
-fn main() {
-    // basic req:
-    mut req := OllamaRequest{
-        model:  "huihui_ai/qwen2.5-coder-abliterate:0.5b"
-        prompt: "Why is the sky blue? Answer briefly."
-        stream: false
-    }
-
-    // test: ok, errmsg := req.set_model("abcd")
-
-    // test:
-    if !ok {
-        println(errmsg)
-        return
-    }
-
-    // test:
-    resp := req.completion()
-    resp.print()
-    println(req.model)
-}
-
-// YAY IT WORKS..
-// status: 200
-// model: huihui_ai/qwen2.5-coder-abliterate:0.5b
-// response: The sky is blue because of.... (LOTS OF TEXT)
 ```

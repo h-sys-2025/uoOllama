@@ -146,13 +146,15 @@ struct ToolCall {
 
 struct Parser {
   pub mut:
-  tool_calls []ToolCall
-  text       []string
+    tool_calls []ToolCall
+    text       []string
+    raw string
 }
 
 pub fn (skills Skills) parse(message string) Parser {
   mut parser := Parser{}
   lines := message.split("\n")
+  parser.raw = message
   mut i := 0
 
   for i < lines.len {
@@ -197,6 +199,17 @@ pub fn (skills Skills) parse(message string) Parser {
     i++
   }
   return parser
+}
+
+pub fn (parser Parser) fmt_parsed() string {
+  mut resukt := ""
+  result = "${result} \n=== Parsed ===")
+  for tc in parsed.tool_calls {
+    result = "${result} \nTool: ${tc.name}")
+    for k, v in tc.args {
+      result = "${result} \n  ${k} = ${v}")
+    }
+  }
 }
 
 pub fn (skills Skills) execute_tool(call ToolCall) string {
